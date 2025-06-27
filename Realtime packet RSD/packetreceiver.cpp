@@ -7,7 +7,7 @@ void PacketReceiver::run()
     qDebug() << "[INFO] PacketReceiver thread started";
 
     QSerialPort serial;
-    serial.setPortName("COM6");  // 🔧 Make sure this is correct
+    serial.setPortName("COM6");  
     serial.setBaudRate(QSerialPort::Baud115200);
     serial.setDataBits(QSerialPort::Data8);
     serial.setParity(QSerialPort::NoParity);
@@ -44,7 +44,6 @@ void PacketReceiver::run()
 
                 if (current.size() == PACKET_SIZE) {
                     if (static_cast<unsigned char>(current.at(PACKET_SIZE - 1)) == FOOTER_BYTE) {
-                        // ✅ Valid packet
                         QDateTime ts = QDateTime::currentDateTimeUtc();
                         buffer.push(current);
                         emit packetReceived(current, ts);
@@ -55,10 +54,8 @@ void PacketReceiver::run()
                         current.clear();
                         inPacket = false;
                     } else {
-                        // ❌ Footer mismatch
                         qDebug() << "[INVALID PACKET] Footer mismatch. Data:" << current.toHex(' ').toUpper();
 
-                        // Attempt resync by looking for new header
                         int newStart = -1;
                         for (int i = 1; i < PACKET_SIZE; ++i) {
                             if (static_cast<unsigned char>(current.at(i)) == HEADER_BYTE) {
