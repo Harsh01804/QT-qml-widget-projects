@@ -9,7 +9,6 @@ public:
     explicit CircularBuffer(size_t capacity)
         : buf(capacity), head(0), tail(0), full(false), stopping(false) {}
 
-    // Push an item; if full, overwrite oldest
     void push(const T& item) {
         std::unique_lock<std::mutex> lock(mtx);
         buf[head] = item;
@@ -21,8 +20,7 @@ public:
         cv.notify_one();
     }
 
-    // Pop an item; block until available or stop() called.
-    // If stopping and empty, returns default-constructed T.
+   
     T pop() {
         std::unique_lock<std::mutex> lock(mtx);
         cv.wait(lock, [this]{ return stopping || full || (head != tail); });
