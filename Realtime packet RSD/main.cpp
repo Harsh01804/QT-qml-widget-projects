@@ -13,13 +13,11 @@ int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
 
-    /* -------- one stamp for this run -------- */
     const QString stamp =
         QDateTime::currentDateTime().toString("dd-MM-yyyy_HH-mm-ss");
 
     CircularBuffer<QByteArray> buffer(1024);
 
-    /* -------- per-run filenames -------- */
     const QString logName = QString("telemetry_%1.log").arg(stamp);
     const QString csvName = QString("packets_%1.csv").arg(stamp);
 
@@ -32,9 +30,8 @@ int main(int argc, char *argv[])
                      &model,    &TelemetryModel::appendPacket,
                      Qt::QueuedConnection);
 
-    /* -------- expose to QML -------- */
     QQmlApplicationEngine engine;
-    engine.addImportPath("E:/Qt/6.9.1/mingw_64/qml");   // adjust to your Qt path
+    engine.addImportPath("E:/Qt/6.9.1/mingw_64/qml");   
 
     engine.rootContext()->setContextProperty("telemetryModel", &model);
     engine.rootContext()->setContextProperty("controller",     &controller);
@@ -46,7 +43,6 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty())
         return -1;
 
-    /* -------- start / stop receiver thread -------- */
     receiver.start();
     QObject::connect(&app, &QCoreApplication::aboutToQuit, [&]{
         receiver.requestInterruption();
